@@ -9,6 +9,66 @@ import (
 	"errors"
 )
 
+func main() {
+	pathFlag := flag.String("path", ".", "path to folder")
+	fmt.Printf("pathflag set to: %v\n", *pathFlag)
+	recursiveFlag := flag.Bool("r", false, "when set, list files recursively")
+	fmt.Printf("recursiveflag set to: %v\n", *recursiveFlag)
+	outputFlag := flag.String("output", "text", "<json|yaml|text>")
+	fmt.Printf("outputFlag set to: %v\n", *outputFlag)
+	flag.Parse()
+
+	path, err := filepath.Abs(*pathFlag)
+
+	if(err != nil) {
+		log.Fatal(err)
+	}
+
+	output := resolveOutputFlag(*outputFlag)
+	if(output == 0) {
+		log.Fatal(errors.New("invalid output type; choose <json|yaml|text>"))
+	}
+
+	fmt.Printf("output: %v\n", output)
+
+	fileSlice := make([]FileInformation, 0, 100)
+
+	fmt.Printf("walking filepath...\n")
+	filepath.Walk(path, WalkAndBuildFileInformation(&fileSlice, *recursiveFlag))
+
+	for _,fileInfo := range fileSlice {
+		fmt.Printf("%s\n", fileInfo)
+	}
+}
+
+func WalkAndBuildFileInformation(filePtr *[]FileInformation, recursive bool) filepath.WalkFunc {
+	return filepath.WalkFunc(func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+
+		fileInfo := FileInformation {
+			Path: 			path,
+			ModTime: 		info.ModTime(),
+			IsLink: 		info.Mode() == os.ModeSymlink,
+			IsDir: 			info.IsDir(),
+			LinksTo: 		"TODO",
+			Size:			info.Size(),
+			Name:			info.Name(),
+		}
+
+		fileSlice := *filePtr
+		*filePtr = append(fileSlice, fileInfo)
+
+		if !recursive {
+			return filepath.SkipDir
+		} else {
+			return nil
+		}
+    })
+}
+
 type Output int
 
 const (
@@ -28,40 +88,3 @@ func resolveOutputFlag(outputFlag string) Output {
     }
     return 0
 }
-
-func main() {
-	pathFlag := flag.String("path", "", "path to folder; required")
-	recursiveFlag := flag.Bool("r", false, "when set, list files recursively")
-	outputFlag := flag.String("output", "text", "<json|yaml|text>")
-	flag.Parse()
-
-	if(*pathFlag == "") {
-		log.Fatal(errors.New("path required"))
-	}
-
-	output := resolveOutputFlag(*outputFlag)
-	if(output == 0) {
-		log.Fatal(errors.New("invalid output type; choose <json|yaml|text>"))
-	}
-
-	filepath.Walk(*pathFlag, WalkAndBuildFileInformation(*recursiveFlag))
-}
-
-func WalkAndBuildFileInformation(recursive bool) filepath.WalkFunc {
-	return filepath.WalkFunc(func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			log.Print(err)
-			return nil
-		}
-
-		fmt.Println(path)
-
-		if !recursive {
-			return filepath.SkipDir
-		} else {
-			return nil
-		}
-
-    })
-}
-
