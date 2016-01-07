@@ -69,7 +69,7 @@ func (dirPtr *DirInfo) WalkAndBuildFileInformation(recursive bool) filepath.Walk
         
         dirPtr.AppendFileInfo(&fileInfo)
         
-        if !recursive &  {
+        if !recursive {
             return filepath.SkipDir
         }
         
