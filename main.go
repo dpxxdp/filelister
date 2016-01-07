@@ -44,7 +44,7 @@ func main() {
         	if err!=nil {
           		log.Fatal(err)
        		}
-        	fmt.Println(string(yamlEncoded))
+			fmt.Println(string(yamlEncoded))
     }
 }
 
