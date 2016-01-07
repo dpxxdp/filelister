@@ -22,29 +22,30 @@ type FileInfo struct {
 	Children       []FileInfo  `json:"children" yaml:"children"`
 }
 
-//ScanTreeForPath scans the FileInfo and its children for a pointer to the given path, if it doesn't exist it returns an error
+//ScanTreeForPath scans the FileInfo and its children for a pointer to the given path and its depth in the tree
+//if it doesn't exist it returns an error
 //useful for finding a "parent" directory to attach a child under
-func (f *FileInfo) ScanTreeForPath(path string) (*FileInfo, error) {
-    
+func (f *FileInfo) ScanTreeForPath(path string, depth int) (*FileInfo, int, error) {
     //if this file is the one we're looking for, return it
     if path == f.Path {
-        return f, nil
+        return f, depth, nil
     }
     
     //if not, scan the children recursively
     for i := range f.Children {
         if(path == f.Children[i].Path) {
-            return &f.Children[i], nil
+            depth++
+            return &f.Children[i],depth, nil
         }
         
-        ptr,_ := f.Children[i].ScanTreeForPath(path)
+        ptr,depth,_ := f.Children[i].ScanTreeForPath(path, depth+1)
         if(ptr != nil) {
-            return ptr, nil
+            return ptr,depth, nil
         }
     }
     
     //if we make it all the way through, the path we are looking for is not in this tree
-    return nil, errors.New("these are not the droids you are looking for")
+    return nil, 0, errors.New("these are not the droids you are looking for")
 }
 
 //BuildStringGivenDepth prints the filepath with the given number of tabs in front to simulate directory structure
