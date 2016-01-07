@@ -27,7 +27,7 @@ type FileInfo struct {
 func (f *FileInfo) ScanTreeForPath(path string) (*FileInfo, error) {
     
     //if this file is the one we're looking for, return it
-    if(path == f.Path) {
+    if path == f.Path {
         return f, nil
     }
     

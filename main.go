@@ -18,12 +18,12 @@ func main() {
 	flag.Parse()
 
 	path, err := filepath.Abs(*pathFlag)
-	if(err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	output := resolveOutputFlag(*outputFlag)
-	if(output == 0) {
+	if output == 0 {
 		log.Fatal(errors.New("invalid output type; choose <json|yaml|text>"))
 	}
 

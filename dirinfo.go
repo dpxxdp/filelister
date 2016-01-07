@@ -62,14 +62,14 @@ func (dirPtr *DirInfo) WalkAndBuildFileInformation(recursive bool) filepath.Walk
 			Size:			info.Size(),
 			Name:			info.Name(),
 		}
-		if(fileInfo.IsLink) {
+		if fileInfo.IsLink {
 			symlink, _ := os.Readlink(fileInfo.Path)
 			fileInfo.LinksTo = symlink
 		}
         
         dirPtr.AppendFileInfo(&fileInfo)
         
-        if(!recursive) {
+        if !recursive &  {
             return filepath.SkipDir
         }
         
